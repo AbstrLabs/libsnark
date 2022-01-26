@@ -32,8 +32,8 @@ r1cs_constraint_system<libff::Fr<libff::default_ec_pp> > get_constraint_system_f
     r1cs_constraint_system<FieldT> result;
     const GLA adapter;
 
-    GLA::protoboard_t converted_pb = adapter.convert(pb);
-    for (const GLA::constraint_t &constr : converted_pb.first)
+    GLA::constraint_sys_t converted_pb = adapter.convert(pb.constraintSystem());
+    for (const GLA::constraint_t &constr : converted_pb)
     {
         result.constraints.emplace_back(r1cs_constraint<FieldT>(convert_gadgetlib2_linear_combination(std::get<0>(constr)),
                                                                 convert_gadgetlib2_linear_combination(std::get<1>(constr)),
@@ -41,9 +41,11 @@ r1cs_constraint_system<libff::Fr<libff::default_ec_pp> > get_constraint_system_f
     }
     //The number of variables is the highest index created.
     //TODO: If there are multiple protoboards, or variables not assigned to a protoboard, then getNextFreeIndex() is *not* the number of variables! See also in get_variable_assignment_from_gadgetlib2.
+    std::cout << "=================" << std::endl;
     const size_t num_variables = GLA::getNextFreeIndex();
     result.primary_input_size = pb.numInputs();
     result.auxiliary_input_size = num_variables - pb.numInputs();
+    std::cout << result.primary_input_size << " " << result.auxiliary_input_size << std::endl;
     return result;
 }
 

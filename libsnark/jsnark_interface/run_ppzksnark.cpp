@@ -12,6 +12,16 @@
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_gg_ppzksnark/examples/run_r1cs_gg_ppzksnark.hpp>
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_gg_ppzksnark/r1cs_gg_ppzksnark.hpp>
 #include <libsnark/common/default_types/r1cs_gg_ppzksnark_pp.hpp>
+#include <stdlib.h>
+#include <fstream>
+
+enum Command {
+	TranslateCircuit,
+	TranslateInput,
+	Generate,
+	Proof,
+	Verify,
+};
 
 int main(int argc, char **argv) {
 
@@ -19,26 +29,56 @@ int main(int argc, char **argv) {
 	gadgetlib2::initPublicParamsFromDefaultPp();
 	gadgetlib2::GadgetLibAdapter::resetVariableIndex();
 	ProtoboardPtr pb = gadgetlib2::Protoboard::create(gadgetlib2::R1P);
+	Command cmd;
 
 	int inputStartIndex = 0;
-	if(argc == 4){
-		if(strcmp(argv[1], "gg") != 0){
-			cout << "Invalid Argument - Terminating.." << endl;
-			return -1;
-		} else{
-			cout << "Using ppzsknark in the generic group model [Gro16]." << endl;
-		}
-		inputStartIndex = 1;	
-	} 	
+	assert(argc > 2);
+	if (strcmp(argv[1], "translate_circuit") == 0) {
+		cmd = TranslateCircuit;
+	} else if (strcmp(argv[1], "translate_input") == 0) {
+		cmd = TranslateInput;
+	} else {
+		cerr << "Unimplemented" << endl;
+		exit(1);
+	}
+
+	cout << "Using ppzsknark in the generic group model [Gro16]." << endl;
+	switch (cmd) {
+	case TranslateCircuit:
+	{		
+		assert(argc == 4);
+		char *arith_filename = argv[2];
+		char *output_filename = argv[3];
+		cout << "Translate Circuit" << endl;
+		CircuitReader reader(arith_filename, pb);
+		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+		std::ofstream cs_out(output_filename, ios::binary | ios::out);
+		cs_out << cs;
+		cs_out.close();
+		break;
+	}
+	default:
+		cerr << "Unimplemented" << endl;
+		exit(1);
+	}
+	exit(0);
 
 	// Read the circuit, evaluate, and translate constraints
 	CircuitReader reader(argv[1 + inputStartIndex], argv[2 + inputStartIndex], pb);
-	r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(
-			*pb);
-	const r1cs_variable_assignment<FieldT> full_assignment =
-			get_variable_assignment_from_gadgetlib2(*pb);
+	r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+	// const r1cs_variable_assignment<FieldT> full_assignment =
+			// get_variable_assignment_from_gadgetlib2(*pb);
+	r1cs_variable_assignment<FieldT> full_assignment;
+	std::ifstream fa("full_assignment", ios::binary | ios::in);
+	fa >> full_assignment; 
 	cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
 	cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
+	// std::cout << cs.primary_input_size << " " << cs.auxiliary_input_size << std::endl;
+	// std::ofstream fa("full_assignment", ios::binary | ios::out);
+	// fa << full_assignment;
+	// fa.close();
+	// exit(0);
+
 
 	// extract primary and auxiliary input
 	const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
