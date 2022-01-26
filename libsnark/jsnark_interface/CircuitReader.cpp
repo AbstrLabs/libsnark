@@ -40,9 +40,20 @@ CircuitReader::CircuitReader(char* arithFilepath, ProtoboardPtr pb) {
 	zeroPwires.clear();
 }
 
+CircuitReader::CircuitReader(ProtoboardPtr pb) {
+
+	this->pb = pb;
+}
+
+void CircuitReader::readInput(char* inputsFilepath) {
+
+	ifstream inputfs(inputsFilepath, ifstream::in);
+
+}
+
 void CircuitReader::parse(char* arithFilepath) {
 
-	libff::enter_block("Parsing and Evaluating the circuit");
+	libff::enter_block("Parsing the circuit");
 
 	ifstream arithfs(arithFilepath, ifstream::in);
 	string line;
@@ -154,7 +165,7 @@ void CircuitReader::parse(char* arithFilepath) {
 	arithfs.close();
 
 	// printf("\t Evaluation Done in %lf seconds \n", (double) (evalTime) * 1e-9);
-	 libff::leave_block("Parsing and Evaluating the circuit");
+	 libff::leave_block("Parsing the circuit");
 }
 
 void CircuitReader::parseAndEval(char* arithFilepath, char* inputsFilepath) {

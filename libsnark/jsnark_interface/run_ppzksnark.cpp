@@ -18,8 +18,9 @@
 enum Command {
 	TranslateCircuit,
 	TranslateInput,
+	Translate,
 	Generate,
-	Proof,
+	Prove,
 	Verify,
 };
 
@@ -37,25 +38,77 @@ int main(int argc, char **argv) {
 		cmd = TranslateCircuit;
 	} else if (strcmp(argv[1], "translate_input") == 0) {
 		cmd = TranslateInput;
+	} else if (strcmp(argv[1], "translate") == 0) {
+		cmd = Translate;
+	} else if (strcmp(argv[1], "generate") == 0) {
+		cmd = Generate;
+	} else if (strcmp(argv[1], "prove") == 0) {
+		cmd = Prove;
+	} else if (strcmp(argv[1], "verify") == 0) {
+		cmd = Verify;
 	} else {
 		cerr << "Unimplemented" << endl;
 		exit(1);
 	}
 
-	cout << "Using ppzsknark in the generic group model [Gro16]." << endl;
+	cout << "Using ppzsknark in the generic group model [Groth16]." << endl;
 	switch (cmd) {
 	case TranslateCircuit:
 	{		
-		assert(argc == 4);
+		assert(argc == 5);
 		char *arith_filename = argv[2];
-		char *output_filename = argv[3];
+		char *output_circuit_filename = argv[3];
+		char *output_metadata_filename = argv[4];
 		cout << "Translate Circuit" << endl;
 		CircuitReader reader(arith_filename, pb);
 		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
-		std::ofstream cs_out(output_filename, ios::binary | ios::out);
+		std::ofstream cs_out(output_circuit_filename, ios::binary | ios::out);
 		cs_out << cs;
 		cs_out.close();
+		std::ofstream m_out(output_metadata_filename, ios::out);
+		m_out << cs.primary_input_size + cs.auxiliary_input_size << endl;
+		// TODO: more metadata
+		m_out.close();
 		break;
+	}
+	case Translate:
+	{
+		// Translate Input seems challenging to write, as first step, use this translate circuit + translate input combination
+		assert(argc == 7);
+		char *arith_filename = argv[2];
+		char *in_filename = argv[3];
+		char *output_circuit_filename = argv[4];
+		char *output_primary_input_filename = argv[5];
+		char *output_auxiliary_input_filename = argv[6];
+		cout << "Translate Circuit and Input" << endl;
+		CircuitReader reader(arith_filename, in_filename, pb);
+		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+		const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
+		cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
+		cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
+		const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
+			full_assignment.begin() + cs.num_inputs());
+		const r1cs_auxiliary_input<FieldT> auxiliary_input(
+			full_assignment.begin() + cs.num_inputs(), full_assignment.end());
+		std::ofstream oc(output_circuit_filename, ios::binary | ios::out);
+		oc << cs;
+		oc.close();
+		std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
+		opi << primary_input;
+		opi.close();
+		std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
+		oai << auxiliary_input;
+		oai.close();
+		break;
+	}
+	case TranslateInput:
+	{
+		// assert(argc == 5);
+		// char *in_filename = argv[2];
+		// char *primary_input_filename = argv[3];
+		// char *auxiliary_input_filename = argv[4];
+		// cout << "Translate Input" << endl;
+		// break;
 	}
 	default:
 		cerr << "Unimplemented" << endl;

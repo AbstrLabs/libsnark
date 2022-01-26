@@ -54,6 +54,8 @@ class CircuitReader {
 public:
 	CircuitReader(char* arithFilepath, char* inputsFilepath, ProtoboardPtr pb);
 	CircuitReader(char* arithFilepath, ProtoboardPtr pb);
+	CircuitReader(ProtoboardPtr pb);
+	void readInput(char* inputsFilepath);
 
 	int getNumInputs() { return numInputs;}
 	int getNumOutputs() { return numOutputs;}
