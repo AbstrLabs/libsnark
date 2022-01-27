@@ -109,6 +109,49 @@ bool run_r1cs_gg_ppzksnark(const r1cs_example<libff::Fr<ppT> > &example,
     return ans;
 }
 
+template<typename ppT>
+void generate_pk_vk(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *pk_path, char *vk_path)
+{
+    r1cs_gg_ppzksnark_keypair<ppT> keypair = r1cs_gg_ppzksnark_generator<ppT>(cs);
+    std::ofstream pko(pk_path, ios::out);
+    pko << keypair.pk;
+    pko.close();
+    std::ofstream vko(vk_path, ios::out);
+    vko << keypair.vk;
+    vko.close();
+}
+
+template<typename ppT>
+void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_filename, char *primary_input_filename, char *aux_input_filename, char *output_proof_filename)
+{
+    std::cout << "here" << std::endl;
+    r1cs_gg_ppzksnark_proving_key<ppT> pk;
+    std::ifstream pki(proof_key_filename, ios::in);
+    pki >> pk;
+    pki.close();
+    std::cout << "herea" << std::endl;
+
+
+    r1cs_primary_input<FieldT> primary_input, aux_input;
+    std::ifstream pi(primary_input_filename, ios::binary | ios::in);
+    pi >> primary_input;
+    pi.close();
+    std::cout << "hereb" << std::endl;
+
+
+    std::ifstream ai(aux_input_filename, ios::binary | ios::in);
+    ai >> aux_input;
+    ai.close();
+
+    std::cout << "here2" << std::endl;
+
+    r1cs_gg_ppzksnark_proof<ppT> proof = r1cs_gg_ppzksnark_prover<ppT>(pk, primary_input, aux_input);
+    
+    std::ofstream po(output_proof_filename, ios::binary | ios::out);
+    po << proof;
+    po.close();
+}
+
 } // libsnark
 
 #endif // RUN_R1CS_GG_PPZKSNARK_TCC_

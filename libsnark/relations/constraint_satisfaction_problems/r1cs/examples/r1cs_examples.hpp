@@ -35,6 +35,9 @@ struct r1cs_example {
         primary_input(primary_input),
         auxiliary_input(auxiliary_input)
     {};
+    r1cs_example<FieldT>(const r1cs_constraint_system<FieldT> &constraint_system) :
+        constraint_system(constraint_system)
+    {};
     r1cs_example<FieldT>(r1cs_constraint_system<FieldT> &&constraint_system,
                          r1cs_primary_input<FieldT> &&primary_input,
                          r1cs_auxiliary_input<FieldT> &&auxiliary_input) :
