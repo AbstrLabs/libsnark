@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream &out, const r1cs_gg_ppzksnark_proving_key<
     out << pk.B_query;
     out << pk.H_query;
     out << pk.L_query;
-    out << pk.constraint_system;
+    // out << pk.constraint_system;
 
     return out;
 }
@@ -82,7 +82,7 @@ std::istream& operator>>(std::istream &in, r1cs_gg_ppzksnark_proving_key<ppT> &p
     in >> pk.B_query;
     in >> pk.H_query;
     in >> pk.L_query;
-    in >> pk.constraint_system;
+    // in >> pk.constraint_system;
 
     return in;
 }
@@ -388,7 +388,8 @@ r1cs_gg_ppzksnark_keypair<ppT> r1cs_gg_ppzksnark_generator(const r1cs_gg_ppzksna
 }
 
 template <typename ppT>
-r1cs_gg_ppzksnark_proof<ppT> r1cs_gg_ppzksnark_prover(const r1cs_gg_ppzksnark_proving_key<ppT> &pk,
+r1cs_gg_ppzksnark_proof<ppT> r1cs_gg_ppzksnark_prover(const r1cs_constraint_system<libff::Fr<ppT> > &cs,
+                                                      const r1cs_gg_ppzksnark_proving_key<ppT> &pk,
                                                       const r1cs_gg_ppzksnark_primary_input<ppT> &primary_input,
                                                       const r1cs_gg_ppzksnark_auxiliary_input<ppT> &auxiliary_input)
 {
@@ -399,7 +400,7 @@ r1cs_gg_ppzksnark_proof<ppT> r1cs_gg_ppzksnark_prover(const r1cs_gg_ppzksnark_pr
 #endif
 
     libff::enter_block("Compute the polynomial H");
-    const qap_witness<libff::Fr<ppT> > qap_wit = r1cs_to_qap_witness_map(pk.constraint_system, primary_input, auxiliary_input, libff::Fr<ppT>::zero(), libff::Fr<ppT>::zero(), libff::Fr<ppT>::zero());
+    const qap_witness<libff::Fr<ppT> > qap_wit = r1cs_to_qap_witness_map(cs, primary_input, auxiliary_input, libff::Fr<ppT>::zero(), libff::Fr<ppT>::zero(), libff::Fr<ppT>::zero());
 
     /* We are dividing degree 2(d-1) polynomial by degree d polynomial
        and not adding a PGHR-style ZK-patch, so our H is degree d-2 */
@@ -410,7 +411,7 @@ r1cs_gg_ppzksnark_proof<ppT> r1cs_gg_ppzksnark_prover(const r1cs_gg_ppzksnark_pr
 
 #ifdef DEBUG
     const libff::Fr<ppT> t = libff::Fr<ppT>::random_element();
-    qap_instance_evaluation<libff::Fr<ppT> > qap_inst = r1cs_to_qap_instance_map_with_evaluation(pk.constraint_system, t);
+    qap_instance_evaluation<libff::Fr<ppT> > qap_inst = r1cs_to_qap_instance_map_with_evaluation(cs, t);
     assert(qap_inst.is_satisfied(qap_wit));
 #endif
 
