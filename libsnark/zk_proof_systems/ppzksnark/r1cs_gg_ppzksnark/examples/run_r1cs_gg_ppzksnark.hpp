@@ -30,6 +30,12 @@ template<typename ppT>
 bool run_r1cs_gg_ppzksnark(const r1cs_example<libff::Fr<ppT> > &example,
                         const bool test_serialization);
 
+template<typename ppT>
+void generate_pk_vk(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *pk_path, char *vk_path);
+
+template<typename ppT>
+void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_filename, char *primary_input_filename, char *aux_input_filename, char *output_proof_filename);
+
 } // libsnark
 
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_gg_ppzksnark/examples/run_r1cs_gg_ppzksnark.tcc>

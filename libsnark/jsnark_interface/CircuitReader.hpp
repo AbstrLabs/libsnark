@@ -53,6 +53,9 @@ typedef ::std::map<Wire, unsigned int> WireMap;
 class CircuitReader {
 public:
 	CircuitReader(char* arithFilepath, char* inputsFilepath, ProtoboardPtr pb);
+	CircuitReader(char* arithFilepath, ProtoboardPtr pb);
+	CircuitReader(ProtoboardPtr pb);
+	void readInput(char* inputsFilepath);
 
 	int getNumInputs() { return numInputs;}
 	int getNumOutputs() { return numOutputs;}
@@ -84,6 +87,7 @@ private:
 	unsigned int currentVariableIdx, currentLinearCombinationIdx;
 
 	void parseAndEval(char* arithFilepath, char* inputsFilepath);
+	void parse(char* arithFilepath);
 	void constructCircuit(char*);  // Second Pass:
 	void mapValuesToProtoboard();
 

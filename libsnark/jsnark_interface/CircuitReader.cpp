@@ -25,6 +25,149 @@ CircuitReader::CircuitReader(char* arithFilepath, char* inputsFilepath,
 	zeroPwires.clear();
 }
 
+CircuitReader::CircuitReader(char* arithFilepath, ProtoboardPtr pb) {	
+
+	this->pb = pb;
+	numWires = 0;
+	numInputs = numNizkInputs = numOutputs = 0;
+	parse(arithFilepath);
+	constructCircuit(arithFilepath);
+	wireLinearCombinations.clear();
+	wireValues.clear();
+	variables.clear();
+	variableMap.clear();
+	zeropMap.clear();
+	zeroPwires.clear();
+}
+
+CircuitReader::CircuitReader(ProtoboardPtr pb) {
+
+	this->pb = pb;
+}
+
+void CircuitReader::readInput(char* inputsFilepath) {
+
+	ifstream inputfs(inputsFilepath, ifstream::in);
+
+}
+
+void CircuitReader::parse(char* arithFilepath) {
+
+	libff::enter_block("Parsing the circuit");
+
+	ifstream arithfs(arithFilepath, ifstream::in);
+	string line;
+
+	if (!arithfs.good()) {
+		printf("Unable to open circuit file %s \n", arithFilepath);
+		exit(-1);
+	}
+
+	getline(arithfs, line);
+	int ret = sscanf(line.c_str(), "total %u", &numWires);
+
+	if (ret != 1) {
+		printf("File Format Does not Match\n");
+		exit(-1);
+	}
+
+	wireValues.resize(numWires);
+	wireUseCounters.resize(numWires);
+	wireLinearCombinations.resize(numWires);
+
+	char type[200];
+	char* inputStr;
+	char* outputStr;
+	unsigned int numGateInputs, numGateOutputs;
+
+	Wire wireId;
+
+	FieldT oneElement = FieldT::one();
+	FieldT zeroElement = FieldT::zero();
+	FieldT negOneElement = FieldT(-1);
+
+	// long long evalTime;
+	// long long begin, end;
+	// evalTime = 0;
+
+	// Parse the circuit: few lines were imported from Pinocchio's code.
+	while (getline(arithfs, line)) {
+		// printf("%s\n", line.c_str());
+		if (line.length() == 0) {
+			continue;
+		}
+		inputStr = new char[line.size()];
+		outputStr = new char[line.size()];
+
+		if (line[0] == '#') {
+			continue;
+		} else if (1 == sscanf(line.c_str(), "input %u", &wireId)) {
+			numInputs++;
+			inputWireIds.push_back(wireId);
+		} else if (1 == sscanf(line.c_str(), "nizkinput %u", &wireId)) {
+			numNizkInputs++;
+			nizkWireIds.push_back(wireId);
+		} else if (1 == sscanf(line.c_str(), "output %u", &wireId)) {
+			numOutputs++;
+			outputWireIds.push_back(wireId);
+			wireUseCounters[wireId]++;
+		} else if (5
+				== sscanf(line.c_str(), "%s in %u <%[^>]> out %u <%[^>]>", type,
+						&numGateInputs, inputStr, &numGateOutputs, outputStr)) {
+
+			istringstream iss_i(inputStr, istringstream::in);
+			std::vector<FieldT> inValues;
+			std::vector<Wire> outWires;
+			Wire inWireId;
+			while (iss_i >> inWireId) {
+				wireUseCounters[inWireId]++;
+			}
+			readIds(outputStr, outWires);
+
+			short opcode;
+			FieldT constant;
+			if (strcmp(type, "add") == 0) {
+				opcode = ADD_OPCODE;
+			} else if (strcmp(type, "mul") == 0) {
+				opcode = MUL_OPCODE;
+			} else if (strcmp(type, "xor") == 0) {
+				opcode = XOR_OPCODE;
+			} else if (strcmp(type, "or") == 0) {
+				opcode = OR_OPCODE;
+			} else if (strcmp(type, "assert") == 0) {
+				wireUseCounters[outWires[0]]++;
+				opcode = CONSTRAINT_OPCODE;
+			} else if (strcmp(type, "pack") == 0) {
+				opcode = PACK_OPCODE;
+			} else if (strcmp(type, "zerop") == 0) {
+				opcode = NONZEROCHECK_OPCODE;
+			} else if (strcmp(type, "split") == 0) {
+				opcode = SPLIT_OPCODE;
+			} else if (strstr(type, "const-mul-neg-")) {
+				opcode = MULCONST_OPCODE;
+				char* constStr = type + sizeof("const-mul-neg-") - 1;
+				constant = readFieldElementFromHex(constStr) * negOneElement;
+			} else if (strstr(type, "const-mul-")) {
+				opcode = MULCONST_OPCODE;
+				char* constStr = type + sizeof("const-mul-") - 1;
+				constant = readFieldElementFromHex(constStr);
+			} else {
+				printf("Error: unrecognized line: %s\n", line.c_str());
+				assert(0);
+			}
+		} else {
+			printf("Error: unrecognized line: %s\n", line.c_str());
+			assert(0);
+		}
+		delete[] inputStr;
+		delete[] outputStr;
+	}
+	arithfs.close();
+
+	// printf("\t Evaluation Done in %lf seconds \n", (double) (evalTime) * 1e-9);
+	 libff::leave_block("Parsing the circuit");
+}
+
 void CircuitReader::parseAndEval(char* arithFilepath, char* inputsFilepath) {
 
 	libff::enter_block("Parsing and Evaluating the circuit");

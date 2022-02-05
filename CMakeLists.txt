@@ -18,7 +18,7 @@ option(
 option(
   LOWMEM
   "Limit the size of multi-exponentiation tables, for low-memory platforms"
-  OFF
+  ON
 )
 option(
   MULTICORE
