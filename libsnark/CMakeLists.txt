@@ -692,6 +692,8 @@ target_link_libraries(
   run_ppzksnark
 
   snark
+  ff
+  mcl_st
 )
 
 set_target_properties(run_ppzksnark

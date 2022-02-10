@@ -4,7 +4,7 @@ project (libsnark)
 
 set(
   CURVE
-  "BN128"
+  "MCL_BN128"
   CACHE
   STRING
   "Default curve: one of ALT_BN128, BN128, EDWARDS, MNT4, MNT6"
@@ -100,6 +100,14 @@ if("${DEPENDS_DIR}" STREQUAL "")
 else()
   set(DEPENDS_DIR "${DEPENDS_DIR}")
 endif()
+
+set(
+  DEPENDS_DIR_MCL
+  "${DEPENDS_DIR}/libff/depends/mcl/"
+  CACHE
+  STRING
+  "Optionally specify the dependency installation directory relative to the source directory (default: inside dependency folder)"
+)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # Common compilation flags and warning configuration
@@ -258,5 +266,30 @@ endif(CCACHE_FOUND)
 # Add a `make check` target that builds and tests
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
+# add_subdirectory("${DEPENDS_DIR_MCL}")
 add_subdirectory(depends)
+
+target_include_directories(ff PUBLIC
+  ${GMP_INCLUDE_DIR} "${DEPENDS_DIR_MCL}/include"
+  ${DEPENDS_DIR_LIBSNARK} ${DEPENDS_DIR_LIBFF} ${DEPENDS_DIR_LIBFQFFT})
+
+# set_property(TARGET ff PROPERTY CXX_STANDARD 11)
+
+
+# if("${DEBUG}" OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#   add_definitions(-DDEBUG=1)
+#   target_compile_definitions(ff PUBLIC DEBUG=1)
+# endif()
+
+# target_include_directories(ff INTERFACE
+#   ${GMP_INCLUDE_DIR} "${DEPENDS_DIR_MCL}/include"
+#   ${DEPENDS_DIR_LIBSNARK} ${DEPENDS_DIR_LIBFF} ${DEPENDS_DIR_LIBFQFFT})
+
+
+# target_link_libraries(ff ${GMP_LIBRARY} ${PROCPS_LIBRARIES} mcl_st)
+
+# if(OpenMP_CXX_FOUND)
+#     target_link_libraries(ff OpenMP::OpenMP_CXX)
+# endif()
+
 add_subdirectory(libsnark)
