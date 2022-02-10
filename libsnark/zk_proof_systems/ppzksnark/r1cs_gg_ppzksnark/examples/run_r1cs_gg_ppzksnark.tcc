@@ -145,7 +145,7 @@ void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_fi
 
     std::cout << "here2" << std::endl;
 
-    r1cs_gg_ppzksnark_proof<ppT> proof = r1cs_gg_ppzksnark_prover<ppT>(pk, primary_input, aux_input);
+    r1cs_gg_ppzksnark_proof<ppT> proof = r1cs_gg_ppzksnark_prover<ppT>(cs, pk, primary_input, aux_input);
     
     std::ofstream po(output_proof_filename, ios::binary | ios::out);
     po << proof;
