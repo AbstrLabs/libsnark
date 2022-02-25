@@ -38,7 +38,7 @@ option(
 option(
   USE_PT_COMPRESSION
   "Use point compression"
-  ON
+  OFF
 )
 option(
   PROFILE_OP_COUNTS
