@@ -26,6 +26,7 @@ linear_combination<libff::Fr<libff::default_ec_pp> > convert_gadgetlib2_linear_c
 
 r1cs_constraint_system<libff::Fr<libff::default_ec_pp> > get_constraint_system_from_gadgetlib2(const gadgetlib2::Protoboard &pb)
 {
+    libff::enter_block("Call to get_constraint_system_from_gadgetlib2");
     typedef libff::Fr<libff::default_ec_pp> FieldT;
     typedef gadgetlib2::GadgetLibAdapter GLA;
 
@@ -46,11 +47,14 @@ r1cs_constraint_system<libff::Fr<libff::default_ec_pp> > get_constraint_system_f
     result.primary_input_size = pb.numInputs();
     result.auxiliary_input_size = num_variables - pb.numInputs();
     std::cout << result.primary_input_size << " " << result.auxiliary_input_size << std::endl;
+    libff::leave_block("Call to get_constraint_system_from_gadgetlib2");
     return result;
 }
 
 r1cs_variable_assignment<libff::Fr<libff::default_ec_pp> > get_variable_assignment_from_gadgetlib2(const gadgetlib2::Protoboard &pb)
 {
+    libff::enter_block("Call to get_variable_assignment_from_gadgetlib2");
+
     typedef libff::Fr<libff::default_ec_pp> FieldT;
     typedef gadgetlib2::GadgetLibAdapter GLA;
 
@@ -65,6 +69,7 @@ r1cs_variable_assignment<libff::Fr<libff::default_ec_pp> > get_variable_assignme
     for(VariableAssignment::iterator iter = assignment.begin(); iter != assignment.end(); ++iter){
     	result[GLA::getVariableIndex(iter->first)] = adapter.convert(iter->second);
     }
+    libff::leave_block("Call to get_variable_assignment_from_gadgetlib2");
 
     return result;
 }

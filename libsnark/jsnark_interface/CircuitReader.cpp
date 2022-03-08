@@ -362,9 +362,7 @@ void CircuitReader::parseAndEval(char* arithFilepath, char* inputsFilepath) {
 void CircuitReader::constructCircuit(char* arithFilepath) {
 
 
-
-	cout << "Translating Constraints ... " << endl;
-
+	libff::enter_block("Call to constructCircuit");
 	
 	#ifndef NO_PROCPS
 	struct proc_t usage1, usage2;
@@ -477,7 +475,8 @@ void CircuitReader::constructCircuit(char* arithFilepath) {
 	unsigned long diff = usage2.vsize - usage1.vsize;
 	printf("\tMemory usage for constraint translation: %lu MB\n", diff >> 20);
         #endif
-        
+	libff::leave_block("Call to constructCircuit");
+
 }
 
 void CircuitReader::mapValuesToProtoboard() {
