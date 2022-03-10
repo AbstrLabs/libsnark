@@ -86,6 +86,7 @@ int main(int argc, char **argv) {
 		const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
 		cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
 		cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
+        std::cout << cs.primary_input_size << std::endl;
 		const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
 			full_assignment.begin() + cs.num_inputs());
 		const r1cs_auxiliary_input<FieldT> auxiliary_input(
@@ -94,9 +95,11 @@ int main(int argc, char **argv) {
 		oc << cs;
 		oc.close();
 		std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
+        std::cout << "=======================" << std::endl;
 		opi << primary_input;
 		opi.close();
-		std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
+        std::cout << "-----------------------" << std::endl;
+        std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
 		oai << auxiliary_input;
 		oai.close();
 		break;
@@ -138,6 +141,15 @@ int main(int argc, char **argv) {
 		libsnark::prove<libsnark::default_r1cs_gg_ppzksnark_pp>(cs, proof_key_filename, primary_input_filename, aux_input_filename, output_proof_filename);
 		break;
 	}
+    case Verify:
+    {
+        assert(argc == 5);
+        char *proof_filename = argv[2];
+        char *primary_input_filename = argv[3];
+        char *vkey_filename = argv[4];
+        libsnark::verify<libsnark::default_r1cs_gg_ppzksnark_pp>(proof_filename, primary_input_filename, vkey_filename);
+        break;
+    }
 	default:
 		cerr << "Unimplemented" << endl;
 		return 1;

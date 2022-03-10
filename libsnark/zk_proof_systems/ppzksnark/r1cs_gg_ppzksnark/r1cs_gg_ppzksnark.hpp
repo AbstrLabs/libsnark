@@ -218,6 +218,8 @@ public:
     friend std::istream& operator>> <ppT>(std::istream &in, r1cs_gg_ppzksnark_verification_key<ppT> &vk);
 
     static r1cs_gg_ppzksnark_verification_key<ppT> dummy_verification_key(const size_t input_size);
+
+    void print() const;
 };
 
 
@@ -344,6 +346,18 @@ public:
         return (g_A.is_well_formed() &&
                 g_B.is_well_formed() &&
                 g_C.is_well_formed());
+    }
+
+    void print() const {
+        std::cout << "begin dump proof:" << std::endl;
+        std::cout << "A" << std::endl;
+        g_A.print();
+        std::cout << "B" << std::endl;
+        g_B.print();
+        std::cout << "C" << std::endl;
+        g_C.print();
+        std::cout << "end dump proof" << std::endl;
+
     }
 
     bool operator==(const r1cs_gg_ppzksnark_proof<ppT> &other) const;

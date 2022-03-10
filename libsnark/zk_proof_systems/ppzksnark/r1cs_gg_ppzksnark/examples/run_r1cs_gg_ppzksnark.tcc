@@ -152,6 +152,37 @@ void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_fi
     po.close();
 }
 
+template<typename ppT>
+void verify(char *proof_filename, char *vkey_filename, char *primary_input_filename) {
+    r1cs_gg_ppzksnark_proof<ppT> proof;
+    std::ifstream  pi(proof_filename, ios::in);
+    pi >> proof;
+    proof.print();
+    pi.close();
+
+    r1cs_gg_ppzksnark_verification_key<ppT> vk;
+    std::ifstream vki(vkey_filename, ios::in);
+    vki >> vk;
+    vki.close();
+    vk.print();
+
+    r1cs_primary_input<FieldT> primary_input;
+    std::ifstream pii(primary_input_filename, ios::binary | ios::in);
+    pii >> primary_input;
+    std::cout << "begin dump primary input:" << std::endl;
+    for (auto &i : primary_input) {
+        i.print();
+    }
+    std::cout << "end dump primary input" << std::endl;
+    pii.close();
+
+    libff::print_header("R1CS GG-ppzkSNARK Verifier");
+    const bool ans = r1cs_gg_ppzksnark_verifier_strong_IC<ppT>(vk, primary_input, proof);
+    printf("\n"); libff::print_indent(); libff::print_mem("after verifier");
+    printf("* The verification result is: %s\n", (ans ? "PASS" : "FAIL"));
+}
+
+
 } // libsnark
 
 #endif // RUN_R1CS_GG_PPZKSNARK_TCC_

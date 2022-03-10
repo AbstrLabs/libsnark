@@ -97,6 +97,24 @@ bool r1cs_gg_ppzksnark_verification_key<ppT>::operator==(const r1cs_gg_ppzksnark
 }
 
 template<typename ppT>
+void r1cs_gg_ppzksnark_verification_key<ppT>::print() const {
+    std::cout << "begin to dump vk" << std::endl;
+    std::cout << "alpha beta" << std::endl;
+    alpha_g1_beta_g2.print();
+    std::cout << "gamma" << std::endl;
+    gamma_g2.print();
+    std::cout << "delta" << std::endl;
+    delta_g2.print();
+    std::cout << "IC" << std::endl;
+    gamma_ABC_g1.first.print();
+    auto rest = gamma_ABC_g1.rest;
+    for (auto &v : rest.values) {
+        v.print();
+    }
+    std::cout << "end to dump vk" << std::endl;
+}
+
+template<typename ppT>
 std::ostream& operator<<(std::ostream &out, const r1cs_gg_ppzksnark_verification_key<ppT> &vk)
 {
     out << vk.alpha_g1_beta_g2 << OUTPUT_NEWLINE;
