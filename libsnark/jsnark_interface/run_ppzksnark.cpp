@@ -22,6 +22,7 @@ enum Command {
 	Generate,
 	Prove,
 	Verify,
+    Convert,
 };
 
 int main(int argc, char **argv) {
@@ -46,10 +47,12 @@ int main(int argc, char **argv) {
 		cmd = Prove;
 	} else if (strcmp(argv[1], "verify") == 0) {
 		cmd = Verify;
-	} else {
-		cerr << "Unimplemented" << endl;
-		exit(1);
-	}
+	} else if (strcmp(argv[1], "convert") == 0) {
+        cmd = Convert;
+    } else {
+        cerr << "Unimplemented" << endl;
+        exit(1);
+    }
 
 	cout << "Using ppzsknark in the generic group model [Groth16]." << endl;
 	switch (cmd) {
@@ -141,6 +144,20 @@ int main(int argc, char **argv) {
 		libsnark::prove<libsnark::default_r1cs_gg_ppzksnark_pp>(cs, proof_key_filename, primary_input_filename, aux_input_filename, output_proof_filename);
 		break;
 	}
+    case Convert:
+    {
+        assert(argc == 9);
+        char *proof_key_filename = argv[2];
+        char *vkey_filename = argv[3];
+        char *primary_input_filename = argv[4];
+        char *proof_filename = argv[5];
+
+        char *output_vkey_filename = argv[6];
+        char *output_primary_input_filename = argv[7];
+        char *output_proof_filename = argv[8];
+        libsnark::convert<libsnark::default_r1cs_gg_ppzksnark_pp>(proof_key_filename, vkey_filename, primary_input_filename, proof_filename, output_vkey_filename, output_primary_input_filename, output_proof_filename);
+        break;
+    }
     case Verify:
     {
         assert(argc == 5);

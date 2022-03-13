@@ -124,26 +124,21 @@ void generate_pk_vk(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *pk_
 template<typename ppT>
 void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_filename, char *primary_input_filename, char *aux_input_filename, char *output_proof_filename)
 {
-    std::cout << "here" << std::endl;
+    std::cout << "enter prove" << std::endl;
     r1cs_gg_ppzksnark_proving_key<ppT> pk;
     std::ifstream pki(proof_key_filename, ios::in);
     pki >> pk;
     pki.close();
-    std::cout << "herea" << std::endl;
-
+    std::cout << "finish loading pk" << std::endl;
 
     r1cs_primary_input<FieldT> primary_input, aux_input;
     std::ifstream pi(primary_input_filename, ios::binary | ios::in);
     pi >> primary_input;
     pi.close();
-    std::cout << "hereb" << std::endl;
-
 
     std::ifstream ai(aux_input_filename, ios::binary | ios::in);
     ai >> aux_input;
     ai.close();
-
-    std::cout << "here2" << std::endl;
 
     r1cs_gg_ppzksnark_proof<ppT> proof = r1cs_gg_ppzksnark_prover<ppT>(cs, pk, primary_input, aux_input);
     
@@ -153,27 +148,71 @@ void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_fi
 }
 
 template<typename ppT>
+void convert(char *proof_key_filename, char * vkey_filename, char * primary_input_filename, char * proof_filename, char * output_vkey_filename, char * output_primary_input_filename, char * output_proof_filename)
+{
+    r1cs_gg_ppzksnark_proving_key<ppT> pk;
+    std::ifstream pki(proof_key_filename, ios::in);
+    pki >> pk;
+    auto alpha = pk.alpha_g1;
+    auto beta = pk.beta_g2;
+
+    r1cs_gg_ppzksnark_verification_key<ppT> vk;
+    std::ifstream vki(vkey_filename, ios::in);
+    vki >> vk;
+    vki.close();
+
+    std::ofstream vko(output_vkey_filename, ios::out);
+    alpha.marshal(vko);
+    beta.marshal(vko);
+    vk.delta_g2.marshal(vko);
+    vk.gamma_g2.marshal(vko);
+    vk.gamma_ABC_g1.first.marshal(vko);
+    for (auto &i : vk.gamma_ABC_g1.rest.values) {
+        i.marshal(vko);
+    }
+    vko.close();
+
+    r1cs_gg_ppzksnark_proof<ppT> proof;
+    std::ifstream  pi(proof_filename, ios::in);
+    pi >> proof;
+    pi.close();
+
+    std::ofstream po(output_proof_filename, ios::binary | ios::out);
+    proof.g_A.marshal(po);
+    proof.g_B.marshal(po);
+    proof.g_C.marshal(po);
+
+    r1cs_primary_input<FieldT> primary_input;
+    std::ifstream pii(primary_input_filename, ios::binary | ios::in);
+    pii >> primary_input;
+
+    // when field element fits in a uint_32, marshal that uint_32 in big endian
+    std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
+    for (auto &i : primary_input) {
+        unsigned long tmp = i.as_ulong();
+        uint32_t tmp2 = (uint32_t)tmp;
+        uint8_t *p = (uint8_t *)&tmp2;
+        for (int j = 3; j >= 0; j--) {
+            opi << p[j];
+        }
+    }
+}
+
+template<typename ppT>
 void verify(char *proof_filename, char *vkey_filename, char *primary_input_filename) {
     r1cs_gg_ppzksnark_proof<ppT> proof;
     std::ifstream  pi(proof_filename, ios::in);
     pi >> proof;
-    proof.print();
     pi.close();
 
     r1cs_gg_ppzksnark_verification_key<ppT> vk;
     std::ifstream vki(vkey_filename, ios::in);
     vki >> vk;
     vki.close();
-    vk.print();
 
     r1cs_primary_input<FieldT> primary_input;
     std::ifstream pii(primary_input_filename, ios::binary | ios::in);
     pii >> primary_input;
-    std::cout << "begin dump primary input:" << std::endl;
-    for (auto &i : primary_input) {
-        i.print();
-    }
-    std::cout << "end dump primary input" << std::endl;
     pii.close();
 
     libff::print_header("R1CS GG-ppzkSNARK Verifier");
