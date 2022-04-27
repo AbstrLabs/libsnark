@@ -181,6 +181,13 @@ void convert(char *proof_key_filename, char * vkey_filename, char * primary_inpu
     proof.g_A.marshal(po);
     proof.g_B.marshal(po);
     proof.g_C.marshal(po);
+    std::string po_filename(output_proof_filename);
+    std::ofstream po_negA(po_filename + ".negA", ios::binary | ios::out);
+    std::ofstream po_B(po_filename + ".B", ios::binary | ios::out);
+    std::ofstream po_C(po_filename + ".C", ios::binary | ios::out);
+    (-(proof.g_A)).marshal(po_negA);
+    proof.g_B.marshal(po_B);
+    proof.g_C.marshal(po_C);
 
     r1cs_primary_input<FieldT> primary_input;
     std::ifstream pii(primary_input_filename, ios::binary | ios::in);
@@ -204,6 +211,12 @@ void verify(char *proof_filename, char *vkey_filename, char *primary_input_filen
     std::ifstream  pi(proof_filename, ios::in);
     pi >> proof;
     pi.close();
+
+    std::cout << "haaaaaaaaaaaaaaaaaaaa" << std::endl;
+    proof.g_A.pt.x.dump();
+    proof.g_A.pt.x.fromMont();
+    proof.g_A.pt.x.dump();
+    exit(0);
 
     r1cs_gg_ppzksnark_verification_key<ppT> vk;
     std::ifstream vki(vkey_filename, ios::in);
