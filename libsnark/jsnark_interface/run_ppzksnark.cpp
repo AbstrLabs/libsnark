@@ -109,12 +109,38 @@ int main(int argc, char **argv) {
 	}
 	case TranslateInput:
 	{
-		// assert(argc == 5);
-		// char *in_filename = argv[2];
-		// char *primary_input_filename = argv[3];
-		// char *auxiliary_input_filename = argv[4];
-		// cout << "Translate Input" << endl;
-		// break;
+        assert(argc == 7);
+        char *arith_filename = argv[2];
+        char *in_filename = argv[3];
+        char *circuit_filename = argv[4];
+        char *output_primary_input_filename = argv[5];
+        char *output_auxiliary_input_filename = argv[6];
+        cout << "Translate Circuit and Input" << endl;
+        CircuitReader reader(arith_filename, in_filename, pb);
+
+        r1cs_constraint_system<FieldT> cs;
+        std::ifstream ci(circuit_filename, ios::binary | ios::in);
+        ci >> cs;
+        ci.close();
+
+        const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
+        cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
+        cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
+        std::cout << cs.primary_input_size << std::endl;
+        const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
+                                                       full_assignment.begin() + cs.num_inputs());
+        const r1cs_auxiliary_input<FieldT> auxiliary_input(
+                full_assignment.begin() + cs.num_inputs(), full_assignment.end());
+
+        std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
+        std::cout << "=======================" << std::endl;
+        opi << primary_input;
+        opi.close();
+        std::cout << "-----------------------" << std::endl;
+        std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
+        oai << auxiliary_input;
+        oai.close();
+        break;
 	}
 	case Generate:
 	{
