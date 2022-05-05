@@ -16,7 +16,6 @@
 #include <fstream>
 
 enum Command {
-	TranslateCircuit,
 	TranslateInput,
 	Translate,
 	Generate,
@@ -35,9 +34,7 @@ int main(int argc, char **argv) {
 
 	int inputStartIndex = 0;
 	assert(argc > 2);
-	if (strcmp(argv[1], "translate_circuit") == 0) {
-		cmd = TranslateCircuit;
-	} else if (strcmp(argv[1], "translate_input") == 0) {
+    if (strcmp(argv[1], "translate_input") == 0) {
 		cmd = TranslateInput;
 	} else if (strcmp(argv[1], "translate") == 0) {
 		cmd = Translate;
@@ -56,24 +53,6 @@ int main(int argc, char **argv) {
 
 	cout << "Using ppzsknark in the generic group model [Groth16]." << endl;
 	switch (cmd) {
-	case TranslateCircuit:
-	{		
-		assert(argc == 5);
-		char *arith_filename = argv[2];
-		char *output_circuit_filename = argv[3];
-		char *output_metadata_filename = argv[4];
-		cout << "Translate Circuit" << endl;
-		CircuitReader reader(arith_filename, pb);
-		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
-		std::ofstream cs_out(output_circuit_filename, ios::binary | ios::out);
-		cs_out << cs;
-		cs_out.close();
-		std::ofstream m_out(output_metadata_filename, ios::out);
-		m_out << cs.primary_input_size + cs.auxiliary_input_size << endl;
-		// TODO: more metadata
-		m_out.close();
-		break;
-	}
 	case Translate:
 	{
 		// Translate Input seems challenging to write, as first step, use this translate circuit + translate input combination
