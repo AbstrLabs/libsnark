@@ -78,10 +78,9 @@ int main(int argc, char **argv) {
 		oc << cs;
 		oc.close();
 		std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
-        std::cout << "=======================" << std::endl;
 		opi << primary_input;
 		opi.close();
-        std::cout << "-----------------------" << std::endl;
+
         std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
 		oai << auxiliary_input;
 		oai.close();
@@ -95,7 +94,7 @@ int main(int argc, char **argv) {
         char *circuit_filename = argv[4];
         char *output_primary_input_filename = argv[5];
         char *output_auxiliary_input_filename = argv[6];
-        cout << "Translate Circuit and Input" << endl;
+        cout << "Translate Input" << endl;
         CircuitReader reader(arith_filename, in_filename, pb);
         std::ifstream ci(circuit_filename, ios::binary | ios::in);
         size_t primary_input_size;
@@ -108,10 +107,9 @@ int main(int argc, char **argv) {
                 full_assignment.begin() + primary_input_size, full_assignment.end());
 
         std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
-        std::cout << "=======================" << std::endl;
         opi << primary_input;
         opi.close();
-        std::cout << "-----------------------" << std::endl;
+
         std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
         oai << auxiliary_input;
         oai.close();
