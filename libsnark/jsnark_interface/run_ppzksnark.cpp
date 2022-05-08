@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
 		cout << "Translate Circuit and Input" << endl;
 		CircuitReader reader(arith_filename, in_filename, pb);
 		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+        // 10688740
 		const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
 		cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
 		cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
@@ -96,20 +97,15 @@ int main(int argc, char **argv) {
         char *output_auxiliary_input_filename = argv[6];
         cout << "Translate Circuit and Input" << endl;
         CircuitReader reader(arith_filename, in_filename, pb);
-
-        r1cs_constraint_system<FieldT> cs;
         std::ifstream ci(circuit_filename, ios::binary | ios::in);
-        ci >> cs;
+        size_t primary_input_size;
+        ci >> primary_input_size;
         ci.close();
-
         const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
-        cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
-        cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
-        std::cout << cs.primary_input_size << std::endl;
         const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
-                                                       full_assignment.begin() + cs.num_inputs());
+                                                       full_assignment.begin() + primary_input_size);
         const r1cs_auxiliary_input<FieldT> auxiliary_input(
-                full_assignment.begin() + cs.num_inputs(), full_assignment.end());
+                full_assignment.begin() + primary_input_size, full_assignment.end());
 
         std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
         std::cout << "=======================" << std::endl;
