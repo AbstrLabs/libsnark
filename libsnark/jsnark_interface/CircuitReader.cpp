@@ -13,9 +13,9 @@ CircuitReader::CircuitReader(char* arithFilepath, char* inputsFilepath,
 	numWires = 0;
 	numInputs = numNizkInputs = numOutputs = 0;
 
-	parseAndEval(arithFilepath, inputsFilepath);
-	constructCircuit(arithFilepath);
-	mapValuesToProtoboard();
+	parseAndEval(arithFilepath, inputsFilepath); // 14s
+	constructCircuit(arithFilepath); // 33s
+	mapValuesToProtoboard(); // 14s
 
 	wireLinearCombinations.clear();
 	wireValues.clear();
