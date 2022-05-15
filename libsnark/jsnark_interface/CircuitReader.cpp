@@ -13,6 +13,7 @@ CircuitReader::CircuitReader(char* arithFilepath, char* inputsFilepath,
 	numWires = 0;
 	numInputs = numNizkInputs = numOutputs = 0;
 
+    // Timing below is measured on i7-10875H, 64G RAM laptop, tlsNotary circuit (4M constraint version)
 	parseAndEval(arithFilepath, inputsFilepath); // 14s
 	constructCircuit(arithFilepath); // 33s
 	mapValuesToProtoboard(); // 14s
