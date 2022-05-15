@@ -16,7 +16,6 @@
 #include <fstream>
 
 enum Command {
-	TranslateCircuit,
 	TranslateInput,
 	Translate,
 	Generate,
@@ -35,9 +34,7 @@ int main(int argc, char **argv) {
 
 	int inputStartIndex = 0;
 	assert(argc > 2);
-	if (strcmp(argv[1], "translate_circuit") == 0) {
-		cmd = TranslateCircuit;
-	} else if (strcmp(argv[1], "translate_input") == 0) {
+    if (strcmp(argv[1], "translate_input") == 0) {
 		cmd = TranslateInput;
 	} else if (strcmp(argv[1], "translate") == 0) {
 		cmd = Translate;
@@ -56,24 +53,6 @@ int main(int argc, char **argv) {
 
 	cout << "Using ppzsknark in the generic group model [Groth16]." << endl;
 	switch (cmd) {
-	case TranslateCircuit:
-	{		
-		assert(argc == 5);
-		char *arith_filename = argv[2];
-		char *output_circuit_filename = argv[3];
-		char *output_metadata_filename = argv[4];
-		cout << "Translate Circuit" << endl;
-		CircuitReader reader(arith_filename, pb);
-		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
-		std::ofstream cs_out(output_circuit_filename, ios::binary | ios::out);
-		cs_out << cs;
-		cs_out.close();
-		std::ofstream m_out(output_metadata_filename, ios::out);
-		m_out << cs.primary_input_size + cs.auxiliary_input_size << endl;
-		// TODO: more metadata
-		m_out.close();
-		break;
-	}
 	case Translate:
 	{
 		// Translate Input seems challenging to write, as first step, use this translate circuit + translate input combination
@@ -86,6 +65,7 @@ int main(int argc, char **argv) {
 		cout << "Translate Circuit and Input" << endl;
 		CircuitReader reader(arith_filename, in_filename, pb);
 		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+        // 10688740
 		const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
 		cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
 		cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
@@ -98,10 +78,9 @@ int main(int argc, char **argv) {
 		oc << cs;
 		oc.close();
 		std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
-        std::cout << "=======================" << std::endl;
 		opi << primary_input;
 		opi.close();
-        std::cout << "-----------------------" << std::endl;
+
         std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
 		oai << auxiliary_input;
 		oai.close();
@@ -109,12 +88,32 @@ int main(int argc, char **argv) {
 	}
 	case TranslateInput:
 	{
-		// assert(argc == 5);
-		// char *in_filename = argv[2];
-		// char *primary_input_filename = argv[3];
-		// char *auxiliary_input_filename = argv[4];
-		// cout << "Translate Input" << endl;
-		// break;
+        assert(argc == 7);
+        char *arith_filename = argv[2];
+        char *in_filename = argv[3];
+        char *circuit_filename = argv[4];
+        char *output_primary_input_filename = argv[5];
+        char *output_auxiliary_input_filename = argv[6];
+        cout << "Translate Input" << endl;
+        CircuitReader reader(arith_filename, in_filename, pb);
+        std::ifstream ci(circuit_filename, ios::binary | ios::in);
+        size_t primary_input_size;
+        ci >> primary_input_size;
+        ci.close();
+        const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
+        const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
+                                                       full_assignment.begin() + primary_input_size);
+        const r1cs_auxiliary_input<FieldT> auxiliary_input(
+                full_assignment.begin() + primary_input_size, full_assignment.end());
+
+        std::ofstream opi(output_primary_input_filename, ios::binary | ios::out);
+        opi << primary_input;
+        opi.close();
+
+        std::ofstream oai(output_auxiliary_input_filename, ios::binary | ios::out);
+        oai << auxiliary_input;
+        oai.close();
+        break;
 	}
 	case Generate:
 	{
