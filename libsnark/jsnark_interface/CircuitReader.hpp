@@ -61,6 +61,8 @@ public:
 	int getNumOutputs() { return numOutputs;}
 	std::vector<Wire> getInputWireIds() const { return inputWireIds; }
 	std::vector<Wire> getOutputWireIds() const { return outputWireIds; }
+    unsigned int numWires;
+    unsigned int numInputs, numNizkInputs, numOutputs;
 
 private:
 	ProtoboardPtr pb;
@@ -80,9 +82,6 @@ private:
 	std::vector<Wire> inputWireIds;
 	std::vector<Wire> nizkWireIds;
 	std::vector<Wire> outputWireIds;
-
-	unsigned int numWires;
-	unsigned int numInputs, numNizkInputs, numOutputs;
 
 	unsigned int currentVariableIdx, currentLinearCombinationIdx;
 

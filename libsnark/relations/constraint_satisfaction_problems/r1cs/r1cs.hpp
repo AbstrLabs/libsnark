@@ -67,6 +67,7 @@ public:
 
     friend std::ostream& operator<< <FieldT>(std::ostream &out, const r1cs_constraint<FieldT> &c);
     friend std::istream& operator>> <FieldT>(std::istream &in, r1cs_constraint<FieldT> &c);
+    void print() const;
 };
 
 /************************* R1CS variable assignment **************************/
@@ -114,6 +115,7 @@ class r1cs_constraint_system {
 public:
     size_t primary_input_size;
     size_t auxiliary_input_size;
+    size_t secret_input_size;
 
     std::vector<r1cs_constraint<FieldT> > constraints;
 
@@ -143,6 +145,7 @@ public:
     friend std::istream& operator>> <FieldT>(std::istream &in, r1cs_constraint_system<FieldT> &cs);
 
     void report_linear_constraint_statistics() const;
+    void print();
 };
 
 

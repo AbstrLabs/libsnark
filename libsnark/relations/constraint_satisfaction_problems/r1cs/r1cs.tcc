@@ -231,6 +231,14 @@ void r1cs_constraint_system<FieldT>::swap_AB_if_beneficial()
 }
 
 template<typename FieldT>
+void r1cs_constraint_system<FieldT>::print() {
+    for (const r1cs_constraint<FieldT>& c : this->constraints)
+    {
+        c.print();
+    }
+}
+
+template<typename FieldT>
 bool r1cs_constraint_system<FieldT>::operator==(const r1cs_constraint_system<FieldT> &other) const
 {
     return (this->constraints == other.constraints &&
@@ -243,6 +251,7 @@ std::ostream& operator<<(std::ostream &out, const r1cs_constraint_system<FieldT>
 {
     out << cs.primary_input_size << "\n";
     out << cs.auxiliary_input_size << "\n";
+    out << cs.secret_input_size << "\n";
 
     out << cs.num_constraints() << "\n";
     for (const r1cs_constraint<FieldT>& c : cs.constraints)
@@ -258,6 +267,7 @@ std::istream& operator>>(std::istream &in, r1cs_constraint_system<FieldT> &cs)
 {
     in >> cs.primary_input_size;
     in >> cs.auxiliary_input_size;
+    in >> cs.secret_input_size;
 
     cs.constraints.clear();
 
@@ -305,6 +315,15 @@ void r1cs_constraint_system<FieldT>::report_linear_constraint_statistics() const
         }
     }
 #endif
+}
+
+template<typename FieldT>
+void r1cs_constraint<FieldT>::print() const {
+    std::cout << "constraint: " << std::endl;
+    this->a.print();
+    this->b.print();
+    this->c.print();
+    std::cout << std::endl;
 }
 
 } // libsnark
