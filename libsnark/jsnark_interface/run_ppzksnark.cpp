@@ -153,7 +153,9 @@ int main(int argc, char **argv) {
 		char *output_proof_filename = argv[6];
 		r1cs_constraint_system<FieldT> cs;
 		std::ifstream ci(circuit_filename, ios::binary | ios::in);
-		ci >> cs;
+        libff::enter_block("Loading constraint system");
+        ci >> cs;
+        libff::leave_block("Leaving constraint system");
 		ci.close();
 		libsnark::prove<libsnark::default_r1cs_gg_ppzksnark_pp>(cs, proof_key_filename, primary_input_filename, aux_input_filename, output_proof_filename);
 		break;

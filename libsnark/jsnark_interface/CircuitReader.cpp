@@ -345,6 +345,10 @@ void CircuitReader::parseAndEval(char* arithFilepath, char* inputsFilepath) {
 			} else if (opcode == MULCONST_OPCODE) {
 				wireValues[outWires[0]] = constant * inValues[0];
 			}
+            for(int i = 0; i < outWires.size(); i++) {
+                std::cout << "main.go:449 " << outWires[i] << " ";
+                wireValues[outWires[i]].print();
+            }
 			//end =  libff::get_nsec_time();
 			//evalTime += (end - begin);
 		} else {
