@@ -64,13 +64,28 @@ int main(int argc, char **argv) {
 		char *output_auxiliary_input_filename = argv[6];
 		cout << "Translate Circuit and Input" << endl;
 		CircuitReader reader(arith_filename, in_filename, pb);
-		r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+        cout << "num inputs: " << reader.getNumInputs() << endl;
+        cout << "num outputs: " << reader.getNumOutputs() << endl;
+        cout << "num wires: " << reader.numWires << endl;
+        cout << "num nizkinputs:  " << reader.numNizkInputs << endl;
+
+        r1cs_constraint_system<FieldT> cs = get_constraint_system_from_gadgetlib2(*pb);
+
         // 10688740
 		const r1cs_variable_assignment<FieldT> full_assignment = get_variable_assignment_from_gadgetlib2(*pb);
 		cs.primary_input_size = reader.getNumInputs() + reader.getNumOutputs();
 		cs.auxiliary_input_size = full_assignment.size() - cs.num_inputs();
-        std::cout << cs.primary_input_size << std::endl;
-		const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
+        cs.secret_input_size = reader.numNizkInputs;
+        std::cout << "primary_input_size: " << cs.primary_input_size << std::endl;
+        std::cout << "auxiliary_input_size (private input + internal var): " << cs.auxiliary_input_size << std::endl;
+
+        cout << "num variables: " << cs.num_variables() << endl;
+        cout << "num inputs from cs: " << cs.num_inputs() << endl;
+        cout << "num constraints: " << cs.num_constraints() << endl;
+        cout << "constraint system: " << endl;
+        cs.print();
+
+        const r1cs_primary_input<FieldT> primary_input(full_assignment.begin(),
 			full_assignment.begin() + cs.num_inputs());
 		const r1cs_auxiliary_input<FieldT> auxiliary_input(
 			full_assignment.begin() + cs.num_inputs(), full_assignment.end());
@@ -138,7 +153,9 @@ int main(int argc, char **argv) {
 		char *output_proof_filename = argv[6];
 		r1cs_constraint_system<FieldT> cs;
 		std::ifstream ci(circuit_filename, ios::binary | ios::in);
-		ci >> cs;
+        libff::enter_block("Loading constraint system");
+        ci >> cs;
+        libff::leave_block("Leaving constraint system");
 		ci.close();
 		libsnark::prove<libsnark::default_r1cs_gg_ppzksnark_pp>(cs, proof_key_filename, primary_input_filename, aux_input_filename, output_proof_filename);
 		break;

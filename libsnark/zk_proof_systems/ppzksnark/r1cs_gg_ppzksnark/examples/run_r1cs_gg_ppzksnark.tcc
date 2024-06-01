@@ -127,9 +127,10 @@ void prove(const r1cs_constraint_system<libff::Fr<ppT> > &cs, char *proof_key_fi
     std::cout << "enter prove" << std::endl;
     r1cs_gg_ppzksnark_proving_key<ppT> pk;
     std::ifstream pki(proof_key_filename, ios::in);
+    libff::enter_block("Loading pk");
     pki >> pk;
     pki.close();
-    std::cout << "finish loading pk" << std::endl;
+    libff::leave_block("Loading pk");
 
     r1cs_primary_input<FieldT> primary_input, aux_input;
     std::ifstream pi(primary_input_filename, ios::binary | ios::in);
